@@ -1,6 +1,7 @@
 package net.chrupki.persage;
 
 import com.mojang.logging.LogUtils;
+import net.chrupki.persage.items.ModItems;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -35,6 +36,8 @@ public class Persage
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
+
+        ModItems.ITEMS.register(modEventBus);
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
