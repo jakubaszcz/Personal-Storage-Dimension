@@ -1,16 +1,99 @@
 package net.chrupki.persage.world;
 
 import net.chrupki.persage.Persage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 
-public class ModDimension {
+import static net.minecraft.core.BlockPos.getX;
+
+public class ModDimension extends Item {
+
         public static final ResourceKey<Level> PERSONAL_DIMENSION = ResourceKey.create(
                 Registries.DIMENSION,
-                ResourceLocation.fromNamespaceAndPath(Persage.MOD_ID, "personal_dimension")
+                ResourceLocation.fromNamespaceAndPath("persage", "personal_dimension")
         );
+
+        public ModDimension(Properties pProperties) {
+                super(pProperties);
+        }
+
+        @Override
+        public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+                if (level.isClientSide()) {
+                        return InteractionResultHolder.pass(player.getItemInHand(hand));
+                }
+
+
+                ServerPlayer serverPlayer = (ServerPlayer) player;
+                MinecraftServer server = serverPlayer.server;
+                ItemStack stack = player.getItemInHand(hand);
+
+                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+                CompoundTag tag = customData != null ? customData.copyTag() : new CompoundTag();
+
+                if (serverPlayer.level().dimension().equals(ModDimension.PERSONAL_DIMENSION)) {
+
+                        if (tag.contains("return_dimension")) {
+                                String returnDim = tag.getString("return_dimension");
+                                long returnPosLong = tag.getLong("return_position");
+
+                                ResourceKey<Level> dim = ResourceKey.create(
+                                        Registries.DIMENSION,
+                                        ResourceLocation.parse(returnDim)
+                                );
+                                BlockPos pos = BlockPos.of(returnPosLong);
+                                ServerLevel returnLevel = server.getLevel(dim);
+
+                                if (returnLevel != null) {
+                                        serverPlayer.teleportTo(
+                                                returnLevel,
+                                                pos.getX() + 0.5,
+                                                pos.getY(),
+                                                pos.getZ() + 0.5,
+                                                serverPlayer.getYRot(),
+                                                serverPlayer.getXRot()
+                                        );
+                                }
+                        }
+                        return InteractionResultHolder.success(stack);
+                }
+
+                ServerLevel personalWorld = server.getLevel(PERSONAL_DIMENSION);
+
+                if (personalWorld == null) {
+                        return InteractionResultHolder.fail(stack);
+                }
+
+                tag.putString("return_dimension", serverPlayer.level().dimension().location().toString());
+                tag.putLong("return_position", serverPlayer.blockPosition().asLong());
+                stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+
+
+                serverPlayer.teleportTo(
+                        personalWorld,
+                        0,
+                        0,
+                        0,
+                        serverPlayer.getYRot(),
+                        serverPlayer.getXRot()
+                );
+
+                return InteractionResultHolder.success(stack);
+        }
+
 }
