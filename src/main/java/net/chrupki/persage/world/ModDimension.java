@@ -84,15 +84,47 @@ public class ModDimension extends Item {
                 stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 
 
+                int offset = Math.abs(player.getUUID().hashCode() % 10000);
+                BlockPos origin = new BlockPos(offset * 32, 57, 0);
+
+                boolean needsGeneration = true;
+                for (int x = 0; x < 16 && needsGeneration; x++) {
+                        for (int z = 0; z < 16 && needsGeneration; z++) {
+                                BlockPos checkPos = origin.offset(x - 8, -1, z - 8);
+                                if (!personalWorld.isEmptyBlock(checkPos)) {
+                                        needsGeneration = false;
+                                }
+                        }
+                }
+
+                if (needsGeneration) {
+                        int size = 16;
+                        int half = size / 2;
+
+                        for (int x = 0; x < size; x++) {
+                                for (int y = 0; y < size; y++) {
+                                        for (int z = 0; z < size; z++) {
+                                                boolean border = (x == 0 || x == size - 1 ||
+                                                        y == 0 || y == size - 1 ||
+                                                        z == 0 || z == size - 1);
+
+                                                BlockPos pos = origin.offset(x - half, y - half, z - half);
+                                                if (border && personalWorld.isEmptyBlock(pos)) {
+                                                        personalWorld.setBlock(pos, Blocks.BEDROCK.defaultBlockState(), 3);
+                                                }
+                                        }
+                                }
+                        }
+                }
+
                 serverPlayer.teleportTo(
                         personalWorld,
-                        0,
-                        0,
-                        0,
+                        origin.getX() + 0.5,
+                        origin.getY(),
+                        origin.getZ() + 0.5,
                         serverPlayer.getYRot(),
                         serverPlayer.getXRot()
                 );
-
                 return InteractionResultHolder.success(stack);
         }
 
