@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 @Mod(Persage.MOD_ID)
 public class Persage
 {
-    public static final String MOD_ID = "personalstoragedimension";
+    public static final String MOD_ID = "persage";
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
