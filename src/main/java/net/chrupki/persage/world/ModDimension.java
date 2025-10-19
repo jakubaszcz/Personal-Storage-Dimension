@@ -69,6 +69,7 @@ public class ModDimension extends Item {
                                                 serverPlayer.getXRot()
                                         );
                                 }
+                                player.getCooldowns().addCooldown(this, 400);
                         }
                         return InteractionResultHolder.success(stack);
                 }
