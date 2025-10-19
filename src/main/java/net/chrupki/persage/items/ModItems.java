@@ -12,7 +12,7 @@ public class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, Persage.MOD_ID);
 
-    public static final RegistryObject<Item> TEST_ITEM = ModItems.ITEMS.register("test_item",
+    public static final RegistryObject<Item> DIMENSION_KEY = ModItems.ITEMS.register("dimension_key",
             () -> new ModDimension(new Item.Properties().stacksTo(1)));
 
     public static void register(IEventBus eventBus) {
