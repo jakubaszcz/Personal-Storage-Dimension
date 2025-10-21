@@ -44,7 +44,7 @@ public class ModDimension extends Item {
                 ItemStack stack = player.getItemInHand(hand);
 
                 CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
-                CompoundTag tag = customData != null ? customData.copyTag() : new CompoundTag();
+                CompoundTag tag = player.getPersistentData();
 
                 if (serverPlayer.level().dimension().equals(ModDimension.PERSONAL_DIMENSION)) {
 
